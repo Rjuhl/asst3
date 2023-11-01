@@ -35,25 +35,60 @@ static inline int nextPow2(int n) {
 // N is the logical size of the input and output arrays, however
 // students can assume that both the start and result arrays we
 // allocated with next power-of-two sizes as described by the comments
-// in cudaScan().  This is helpful, since your parallel scan
+// in cudaScan().  This is helpful, since your parallel segmented scan
 // will likely write to memory locations beyond N, but of course not
 // greater than N rounded up to the next power of 2.
 //
 // Also, as per the comments in cudaScan(), you can implement an
 // "in-place" scan, since the timing harness makes a copy of input and
 // places it in result
+__global__ void upSweepKernal(int N, int two_d, int* output) {
+    int id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id % (2 * two_d) != 0 or id >= N) return;
+    output[id + (2 * two_d) - 1] += output[id + two_d - 1];
+}
+
+__global__ void downSweepKernal(int N, int two_d, int* output) {
+    int id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id % (2 * two_d) != 0 or id >= N) return;
+    int t = output[id + two_d - 1];
+    output[id + two_d - 1] = output[id + (2 * two_d) - 1];
+    output[id + (2 * two_d) - 1] += t;
+}
+
+__global__ void zeroLastValue(int N, int* output) {
+    output[N - 1] = 0;
+}
+
+
 void exclusive_scan(int* input, int N, int* result)
 {
 
     // CS149 TODO:
     //
-    // Implement your exclusive scan implementation here.  Keep in
+    // Implement your exclusive scan implementation here.  Keep input
     // mind that although the arguments to this function are device
     // allocated arrays, this is a function that is running in a thread
     // on the CPU.  Your implementation will need to make multiple calls
     // to CUDA kernel functions (that you must write) to implement the
     // scan.
 
+    N = nextPow2(N);
+    const int threadsPerBlock = THREADS_PER_BLOCK;
+    const int blocks = (N + threadsPerBlock - 1) / threadsPerBlock;
+    
+
+    // up sweep phase
+    for (int two_d = 1; two_d <= N/2; two_d*=2) {
+        upSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, result);
+    }
+
+    zeroLastValue<<<1, 1>>>(N, result);
+
+    // down sweep phase
+    for (int two_d = N/2; two_d >= 1; two_d /= 2) {
+        downSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, result);
+    }
 
 }
 
@@ -62,7 +97,7 @@ void exclusive_scan(int* input, int N, int* result)
 // cudaScan --
 //
 // This function is a timing wrapper around the student's
-// implementation of scan - it copies the input to the GPU
+// implementation of segmented scan - it copies the input to the GPU
 // and times the invocation of the exclusive_scan() function
 // above. Students should not modify it.
 double cudaScan(int* inarray, int* end, int* resultarray)
@@ -140,6 +175,29 @@ double cudaScanThrust(int* inarray, int* end, int* resultarray) {
     return overallDuration; 
 }
 
+__global__ void mapRepeats(int N, int* input, int* output) {
+    int id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id > N) return;
+    if (id == N) {
+        output[id] = 0;
+    } else {
+        output[id] = input[id] == input[id + 1] ? 1 : 0;
+    }
+}
+
+__global__ void gatherRepeats(int N, int* indexes, int* repeats, int* output) {
+    int id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= N) return;
+    if (repeats[id] == 1) {
+        output[indexes[id]] = id;
+    }
+}
+
+__global__ void convertIndexes(int N, int* indexes, int* output) {
+    int id = threadIdx.x + blockDim.x * blockIdx.x;
+    if (id >= N) return;
+    output[id] = indexes[id + 1] - indexes[id];
+}
 
 // find_repeats --
 //
@@ -160,8 +218,21 @@ int find_repeats(int* device_input, int length, int* device_output) {
     // exclusive_scan function with them. However, your implementation
     // must ensure that the results of find_repeats are correct given
     // the actual array length.
+    int N = nextPow2(length);
+    const int threadsPerBlock = THREADS_PER_BLOCK;
+    const int blocks = (length + threadsPerBlock - 1) / threadsPerBlock;
 
-    return 0; 
+    int* num_repeats = new int;
+    int* indexes;
+    cudaMalloc(&indexes, nextPow2(length) * sizeof(int));
+
+    mapRepeats<<<blocks, threadsPerBlock>>>(length, device_input, indexes);
+    exclusive_scan(indexes, length, indexes);
+    convertIndexes<<<blocks, threadsPerBlock>>>(length, indexes, device_input);
+    gatherRepeats<<<blocks, threadsPerBlock>>>(length, indexes, device_input, device_output);
+    cudaMemcpy(num_repeats, indexes + length - 1, sizeof(int), cudaMemcpyDeviceToHost);
+
+    return *num_repeats;
 }
 
 
