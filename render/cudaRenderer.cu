@@ -471,10 +471,10 @@ __global__ void kernalRender() {
     uint px = blockIdx.x * gridDim.x + (threadIdx.x % TILE_SIZE);
     uint py = blockIdx.y * gridDim.y + (threadIdx.x / TILE_SIZE);
 
-    float top = blockIdx.y * blockDim.y;
-    float bottom = top + blockDim.y;
-    float left = blockIdx.x * blockDim.x;
-    float right = left + blockDim.x;
+    float top = blockIdx.y * gridDim.y;
+    float bottom = top + gridDim.y;
+    float left = blockIdx.x * gridDim.x;
+    float right = left + gridDim.x;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
     uint sharedLinearIndex = threadIdx.x;
@@ -508,7 +508,6 @@ __global__ void kernalRender() {
 
         // color tile
         // If there pixel is in bounds color it 
-        printf("px = %d, py = %d, imageWidth = %d, imageHeight = %d\n", px, py, imageWidth, imageHeight);
         if (px < imageWidth && py < imageHeight){
             
             // Get pixel position and img placement details
