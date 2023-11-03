@@ -508,7 +508,7 @@ __global__ void kernalRender() {
 
         // color tile
         // If there pixel is in bounds color it 
-        printf("px = %d, py = %d, imageWidth = %d, imageHeight = %d", px, py, imageWidth, imageHeight);
+        printf("px = %d, py = %d, imageWidth = %d, imageHeight = %d\n", px, py, imageWidth, imageHeight);
         if (px < imageWidth && py < imageHeight){
             
             // Get pixel position and img placement details
