@@ -435,7 +435,7 @@ __global__ void kernelRenderCircles() {
 }
 
 // <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), BLOCK_SIZE)>>>
-__global__ void render() {
+__global__ void kernalRender() {
     // Init shared arrays (shared arrays are accessible by every thread in a block)
     __shared__ uint possiableCircles[BLOCK_SIZE]
     __shared__ uint circleOneHot[BLOCK_SIZE]; 
@@ -460,7 +460,7 @@ __global__ void render() {
     uint sharedLinearIndex = threadIdx.x;
 
     // For each circle chunk 
-    for (int circleStart = 0; circleStart < numCircles; circleStart += (BLOCKSIZE - 1)){ //BLOCKSIZE or BLOCKSIZE - 1 ???
+    for (int circleStart = 0; circleStart < numCircles; circleStart += (BLOCK_SIZE - 1)){ //BLOCKSIZE or BLOCKSIZE - 1 ???
         int circleIndex = circleStart + sharedLinearIndex;
 
         // Compute one hots
@@ -527,7 +527,7 @@ void
 CudaRenderer::render() {
     dim3 blockDim(BLOCK_SIZE, 1);
     dim3 gridDim(image->width + TILE_SIZE - 1 / TILE_SIZE, image->height + TILE_SIZE - 1 / TILE_SIZE);
-    kernelRenderCircles<<<gridDim, blockDim>>>();
+    kernalRender<<<gridDim, blockDim>>>();
     cudaDeviceSynchronize();
 }
 
