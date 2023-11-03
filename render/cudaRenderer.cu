@@ -471,8 +471,8 @@ __global__ void kernalRender() {
     uint px = blockIdx.x * gridDim.x + (threadIdx.x % TILE_SIZE);
     uint py = blockIdx.y * gridDim.y + (threadIdx.x / TILE_SIZE);
 
-    float top = blockIdx.y * gridDim.y;
-    float bottom = top + gridDim.y;
+    float bottom = blockIdx.y * gridDim.y;
+    float top = bottom + gridDim.y;
     float left = blockIdx.x * gridDim.x;
     float right = left + gridDim.x;
 
@@ -487,10 +487,10 @@ __global__ void kernalRender() {
         float3 p = *(float3*)(&cuConstRendererParams.position[circleIndex * 3]);
         circleOneHot[sharedLinearIndex] = circleInBoxConservative(
             p.x, p.y, cuConstRendererParams.radius[circleIndex],
-            invWidth * (static_cast<float>(left) + 0.5f), 
+            invWidth * (static_cast<float>(left) + 0.5f), // Are these correct?
             invWidth * (static_cast<float>(right) - 0.5f), 
-            invHeight * (static_cast<float>(top) + 0.5f), 
-            invHeight * (static_cast<float>(bottom) - 0.5f)
+            invHeight * (static_cast<float>(top) - 0.5f), 
+            invHeight * (static_cast<float>(bottom) + 0.5f)
         );
         __syncthreads(); 
 
@@ -528,7 +528,7 @@ __global__ void kernalRender() {
                 if (circleInBox(
                     cp.x, cp.y,
                     cuConstRendererParams.radius[possiableCircleIndex],
-                    invWidth * (static_cast<float>(px) - 0.5f), // Are these correct? 
+                    invWidth * (static_cast<float>(px) - 0.5f), // Are these correct?
                     invWidth * (static_cast<float>(px) + 0.5f), 
                     invHeight * (static_cast<float>(py) + 0.5f), 
                     invHeight * (static_cast<float>(py) - 0.5f)
