@@ -547,8 +547,8 @@ void
 CudaRenderer::render() {
     dim3 blockDim(BLOCK_SIZE, 1);
     dim3 gridDim(image->width + TILE_SIZE - 1 / TILE_SIZE, image->height + TILE_SIZE - 1 / TILE_SIZE);
-    cudaCheckError(kernalRender<<<gridDim, blockDim>>>());
-    cudaDeviceSynchronize();
+    kernalRender<<<gridDim, blockDim>>>();
+    cudaCheckError(cudaDeviceSynchronize());
 }
 
 
