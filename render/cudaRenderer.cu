@@ -480,7 +480,7 @@ __global__ void kernalRender() {
     uint sharedLinearIndex = threadIdx.x;
 
     // For each circle chunk 
-    for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE)){ //BLOCKSIZE or BLOCKSIZE - 1 ???
+    for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { //BLOCKSIZE or BLOCKSIZE - 1 ???
         int circleIndex = circleStart + sharedLinearIndex;
 
         // Compute one hots
@@ -502,6 +502,7 @@ __global__ void kernalRender() {
         if (circleOneHot[sharedLinearIndex]) {
             possiableCircles[indexes[sharedLinearIndex]] = circleIndex; 
         }
+        __syncthreads();
 
         // Update sizes
         int possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
