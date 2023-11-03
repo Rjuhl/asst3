@@ -468,8 +468,8 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    uint px = (blockIdx.x * blockDim.x) + (threadIdx.x % TILE_SIZE);
-    uint py = (blockIdx.y * blockDim.y) + (threadIdx.x / TILE_SIZE);
+    uint px = blockIdx.x * blockDim.x + (threadIdx.x % TILE_SIZE);
+    uint py = blockIdx.y * blockDim.y + (threadIdx.x / TILE_SIZE);
 
     float top = blockIdx.y * blockDim.y;
     float bottom = top + blockDim.y;
@@ -508,7 +508,7 @@ __global__ void kernalRender() {
 
         // color tile
         // If there pixel is in bounds color it 
-        //printf("px = %d, py = %d, imageWidth = %d, imageHeight = %d\n", px, py, imageWidth, imageHeight);
+        printf("px = %d, py = %d, imageWidth = %d, imageHeight = %d\n", px, py, imageWidth, imageHeight);
         if (px < imageWidth && py < imageHeight){
             
             // Get pixel position and img placement details
