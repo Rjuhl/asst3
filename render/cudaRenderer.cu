@@ -472,9 +472,9 @@ __global__ void kernalRender() {
     uint py = blockIdx.y * gridDim.y + (threadIdx.x / TILE_SIZE);
 
     float top = blockIdx.y * gridDim.y;
-    float bottom = top + gridDim.y - 1;
+    float bottom = top + gridDim.y;
     float left = blockIdx.x * gridDim.x;
-    float right = left + gridDim.x - 1;
+    float right = left + gridDim.x;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
     uint sharedLinearIndex = threadIdx.x;
@@ -528,10 +528,10 @@ __global__ void kernalRender() {
                 if (circleInBox(
                     cp.x, cp.y,
                     cuConstRendererParams.radius[possiableCircleIndex],
-                    invWidth * (static_cast<float>(px) + 0.5f), 
                     invWidth * (static_cast<float>(px) - 0.5f), 
-                    invHeight * (static_cast<float>(py) - 0.5f), 
-                    invHeight * (static_cast<float>(py) + 0.5f)
+                    invWidth * (static_cast<float>(px) + 0.5f), 
+                    invHeight * (static_cast<float>(py) + 0.5f), 
+                    invHeight * (static_cast<float>(py) - 0.5f)
                 )) {
                     // Shade pixel with circle 
                     shadePixel(possiableCircleIndex, pixelCenterNorm, cp, imgPtr);
