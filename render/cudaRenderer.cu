@@ -22,6 +22,23 @@
 #define BLOCK_SIZE 1024
 #define SCAN_BLOCK_DIM BLOCK_SIZE
 
+#define DEBUG
+
+#ifdef DEBUG
+#define cudaCheckError(ans) { cudaAssert((ans), __FILE__, __LINE__); }
+inline void cudaAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) 
+   {
+      fprintf(stderr, "CUDA Error: %s at %s:%d\n", 
+        cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+#else
+#define cudaCheckError(ans) ans
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Putting all the cuda kernels here
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -530,7 +547,7 @@ void
 CudaRenderer::render() {
     dim3 blockDim(BLOCK_SIZE, 1);
     dim3 gridDim(image->width + TILE_SIZE - 1 / TILE_SIZE, image->height + TILE_SIZE - 1 / TILE_SIZE);
-    kernalRender<<<gridDim, blockDim>>>();
+    cudaCheckError(kernalRender<<<gridDim, blockDim>>>());
     cudaDeviceSynchronize();
 }
 
