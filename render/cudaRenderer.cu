@@ -437,10 +437,10 @@ __global__ void kernelRenderCircles() {
 // <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), BLOCK_SIZE)>>>
 __global__ void render() {
     // Init shared arrays (shared arrays are accessible by every thread in a block)
-    __shared__ possiableCircles[BLOCK_SIZE]
-    __shared__ circleOneHot[BLOCK_SIZE]; 
-    __shared__ indexes[BLOCK_SIZE];
-    __shared__ scratch[2 * BLOCK_SIZE];
+    __shared__ uint possiableCircles[BLOCK_SIZE]
+    __shared__ uint circleOneHot[BLOCK_SIZE]; 
+    __shared__ uint indexes[BLOCK_SIZE];
+    __shared__ uint scratch[2 * BLOCK_SIZE];
 
     // Init constants 
     const short imageWidth = cuConstRendererParams.imageWidth;
