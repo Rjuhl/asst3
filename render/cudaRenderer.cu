@@ -472,9 +472,9 @@ __global__ void kernalRender() {
     uint py = blockIdx.y * gridDim.y + (threadIdx.x / TILE_SIZE);
 
     float top = blockIdx.y * gridDim.y;
-    float bottom = top + gridDim.y;
+    float bottom = top + gridDim.y - 1;
     float left = blockIdx.x * gridDim.x;
-    float right = left + gridDim.x;
+    float right = left + gridDim.x - 1;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
     uint sharedLinearIndex = threadIdx.x;
@@ -517,7 +517,7 @@ __global__ void kernalRender() {
                 invHeight * (static_cast<float>(py) + 0.5f)
             );
 
-            float4* imgPtr = (float4*)(&cuConstRendererParams.imageData[4 * ((py * imageWidth) + px)]);
+            float4* imgPtr = (float4*)(&cuConstRendererParams.imageData[4 * (py * imageWidth + px)]);
 
             // Iterate through possiable circles to color pixel 
             for (int i = 0; i < possiableCirclesCount; i++) {
