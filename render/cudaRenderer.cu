@@ -20,6 +20,7 @@
 // 3. TILE_SIZE^2 = BLOCK_SIZE
 #define TILE_SIZE 32
 #define BLOCK_SIZE 1024
+#define SCAN_BLOCK_DIM BLOCK_SIZE
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Putting all the cuda kernels here
