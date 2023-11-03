@@ -18,8 +18,8 @@
 // 1. BLOCK_SIZE is a power of 2
 // 2. BLOCK_SIZE <= 1024
 // 3. TILE_SIZE^2 = BLOCK_SIZE
-#define TILE_SIZE = 32;
-#define BLOCK_SIZE = 1024;
+#define TILE_SIZE 32
+#define BLOCK_SIZE 1024
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Putting all the cuda kernels here
