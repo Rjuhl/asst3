@@ -480,14 +480,14 @@ __global__ void kernalRender() {
     uint sharedLinearIndex = threadIdx.x;
 
     // For each circle chunk 
-    for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { //BLOCKSIZE or BLOCKSIZE - 1 ???
+    for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { 
         int circleIndex = circleStart + sharedLinearIndex;
 
         // Compute one hots
         float3 p = *(float3*)(&cuConstRendererParams.position[circleIndex * 3]);
         circleOneHot[sharedLinearIndex] = circleInBoxConservative(
             p.x, p.y, cuConstRendererParams.radius[circleIndex],
-            invWidth * (static_cast<float>(left) + 0.5f), // Are these correct?
+            invWidth * (static_cast<float>(left) + 0.5f), 
             invWidth * (static_cast<float>(right) - 0.5f), 
             invHeight * (static_cast<float>(top) - 0.5f), 
             invHeight * (static_cast<float>(bottom) + 0.5f)
@@ -528,7 +528,7 @@ __global__ void kernalRender() {
                 if (circleInBox(
                     cp.x, cp.y,
                     cuConstRendererParams.radius[possiableCircleIndex],
-                    invWidth * (static_cast<float>(px) - 0.5f), // Are these correct?
+                    invWidth * (static_cast<float>(px) - 0.5f), 
                     invWidth * (static_cast<float>(px) + 0.5f), 
                     invHeight * (static_cast<float>(py) + 0.5f), 
                     invHeight * (static_cast<float>(py) - 0.5f)
