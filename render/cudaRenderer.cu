@@ -517,7 +517,7 @@ __global__ void kernalRender() {
                 invHeight * (static_cast<float>(py) + 0.5f)
             );
 
-            float4* imgPtr = (float4*)(&cuConstRendererParams.imageData[4 * (py * imageWidth + px)]);
+            float4* imgPtr = (float4*)(&cuConstRendererParams.imageData[4 * ((py * imageWidth) + px)]);
 
             // Iterate through possiable circles to color pixel 
             for (int i = 0; i < possiableCirclesCount; i++) {
