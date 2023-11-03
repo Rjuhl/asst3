@@ -489,8 +489,8 @@ __global__ void kernalRender() {
             p.x, p.y, cuConstRendererParams.radius[circleIndex],
             invWidth * (static_cast<float>(left) + 0.5f), 
             invWidth * (static_cast<float>(right) - 0.5f), 
-            invHeight * (static_cast<float>(top) - 0.5f), 
-            invHeight * (static_cast<float>(bottom) + 0.5f)
+            invHeight * (static_cast<float>(top) + 0.5f), 
+            invHeight * (static_cast<float>(bottom) - 0.5f)
         );
         __syncthreads(); 
 
@@ -528,7 +528,7 @@ __global__ void kernalRender() {
                 if (circleInBox(
                     cp.x, cp.y,
                     cuConstRendererParams.radius[possiableCircleIndex],
-                    invWidth * (static_cast<float>(px) - 0.5f), 
+                    invWidth * (static_cast<float>(px) - 0.5f), // Are these correct? 
                     invWidth * (static_cast<float>(px) + 0.5f), 
                     invHeight * (static_cast<float>(py) + 0.5f), 
                     invHeight * (static_cast<float>(py) - 0.5f)
