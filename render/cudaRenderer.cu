@@ -468,8 +468,8 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    uint px = blockIdx.x * blockDim.x + (threadIdx.x % TILE_SIZE);
-    uint py = blockIdx.y * blockDim.y + (threadIdx.x / TILE_SIZE);
+    uint px = blockIdx.x * blockDim.x + (threadIdx.x / TILE_SIZE);
+    uint py = blockIdx.y * blockDim.y + (threadIdx.x % TILE_SIZE);
 
     float top = blockIdx.y * blockDim.y;
     float bottom = top + blockDim.y;
