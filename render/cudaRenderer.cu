@@ -437,7 +437,7 @@ __global__ void kernelRenderCircles() {
 // <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), BLOCK_SIZE)>>>
 __global__ void kernalRender() {
     // Init shared arrays (shared arrays are accessible by every thread in a block)
-    __shared__ uint possiableCircles[BLOCK_SIZE]
+    __shared__ uint possiableCircles[BLOCK_SIZE];
     __shared__ uint circleOneHot[BLOCK_SIZE]; 
     __shared__ uint indexes[BLOCK_SIZE];
     __shared__ uint scratch[2 * BLOCK_SIZE];
@@ -505,7 +505,7 @@ __global__ void kernalRender() {
 
                 // Check if the circle intersect the specific pixel
                 if (circleInBox(
-                    cp.x, cp.y
+                    cp.x, cp.y,
                     cuConstRendererParams.radius[possiableCircleIndex],
                     invWidth * (static_cast<float>(px) + 0.5f), 
                     invWidth * (static_cast<float>(px) - 0.5f), 
