@@ -469,8 +469,8 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    const uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
-    const uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
+    const short px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
+    const short py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
     const short bottom = blockIdx.y * TILE_SIZE;
     const short top = bottom + TILE_SIZE;
@@ -482,7 +482,7 @@ __global__ void kernalRender() {
 
     // For each circle chunk 
     for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { 
-        int circleIndex = circleStart + sharedLinearIndex;
+        uint circleIndex = circleStart + sharedLinearIndex;
 
         // Compute one hots
         float3 p = *(float3*)(&cuConstRendererParams.position[circleIndex * 3]);
@@ -506,7 +506,7 @@ __global__ void kernalRender() {
         __syncthreads();
 
         // Update sizes
-        const short possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
+        uint possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
 
         // color tile
         // If there pixel is in bounds color it 
@@ -522,7 +522,7 @@ __global__ void kernalRender() {
 
             // Iterate through possiable circles to color pixel 
             for (int i = 0; i < possiableCirclesCount; i++) {
-                int possiableCircleIndex = possiableCircles[i];
+                uint possiableCircleIndex = possiableCircles[i];
                 float3 cp = *(float3*)(&cuConstRendererParams.position[possiableCircleIndex * 3]);
 
                 // Check if the circle intersect the specific pixel
