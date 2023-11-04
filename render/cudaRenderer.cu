@@ -18,8 +18,8 @@
 // 1. BLOCK_SIZE is a power of 2
 // 2. BLOCK_SIZE <= 1024
 // 3. TILE_SIZE^2 = BLOCK_SIZE
-#define TILE_SIZE 32
-#define BLOCK_SIZE 1024
+#define TILE_SIZE 16
+#define BLOCK_SIZE 256
 #define SCAN_BLOCK_DIM BLOCK_SIZE
 
 #define DEBUG
@@ -471,7 +471,6 @@ __global__ void kernalRender() {
     uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
     uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
-    if (blockIdx.y > 3) return; 
     float bottom = blockIdx.y * TILE_SIZE;
     float top = bottom + TILE_SIZE;
     float left = blockIdx.x * TILE_SIZE;
