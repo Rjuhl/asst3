@@ -18,8 +18,8 @@
 // 1. BLOCK_SIZE is a power of 2
 // 2. BLOCK_SIZE <= 1024
 // 3. TILE_SIZE^2 = BLOCK_SIZE
-#define TILE_SIZE 16
-#define BLOCK_SIZE 256
+#define TILE_SIZE 32
+#define BLOCK_SIZE 1024
 #define SCAN_BLOCK_DIM BLOCK_SIZE
 
 #define DEBUG
