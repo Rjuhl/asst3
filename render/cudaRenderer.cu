@@ -469,16 +469,16 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
-    uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
+    const uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
+    const uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
-    float bottom = blockIdx.y * TILE_SIZE;
-    float top = bottom + TILE_SIZE;
-    float left = blockIdx.x * TILE_SIZE;
-    float right = left + TILE_SIZE;
+    const short bottom = blockIdx.y * TILE_SIZE;
+    const short top = bottom + TILE_SIZE;
+    const short left = blockIdx.x * TILE_SIZE;
+    const short right = left + TILE_SIZE;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
-    uint sharedLinearIndex = threadIdx.x;
+    const short sharedLinearIndex = threadIdx.x;
 
     // For each circle chunk 
     for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { 
@@ -506,7 +506,7 @@ __global__ void kernalRender() {
         __syncthreads();
 
         // Update sizes
-        int possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
+        const short possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
 
         // color tile
         // If there pixel is in bounds color it 
