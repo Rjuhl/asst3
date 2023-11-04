@@ -14,6 +14,11 @@
 #include "sceneLoader.h"
 #include "util.h"
 
+// FOUR conditions must hold
+// 1. BLOCK_SIZE is a power of 2
+// 2. BLOCK_SIZE <= 1024
+// 3. TILE_SIZE^2 = BLOCK_SIZE
+// 4. BLOCK_SIZE = SCAN_BLOCK_DIM
 #define TILE_SIZE 16
 #define BLOCK_SIZE 256
 #define SCAN_BLOCK_DIM BLOCK_SIZE
@@ -450,7 +455,7 @@ __global__ void kernelRenderCircles() {
     }
 }
 
-// <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), (TILE_SIZE, TILE_SIZE))>>>
+// <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), BLOCK_SIZE)>>>
 __global__ void kernalRender() {
     // Init shared arrays (shared arrays are accessible by every thread in a block)
     __shared__ uint possiableCircles[BLOCK_SIZE];
@@ -464,13 +469,13 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    uint px = blockIdx.x * gridDim.x + (threadIdx.x % TILE_SIZE);
-    uint py = blockIdx.y * gridDim.y + (threadIdx.x / TILE_SIZE);
+    uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
+    uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
-    float bottom = blockIdx.y * gridDim.y;
-    float top = bottom + gridDim.y;
-    float left = blockIdx.x * gridDim.x;
-    float right = left + gridDim.x;
+    float bottom = blockIdx.y * TILE_SIZE;
+    float top = bottom + TILE_SIZE;
+    float left = blockIdx.x * TILE_SIZE;
+    float right = left + TILE_SIZE;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
     uint sharedLinearIndex = threadIdx.x;
