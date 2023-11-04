@@ -14,13 +14,12 @@
 #include "sceneLoader.h"
 #include "util.h"
 
-// FOUR conditions must hold
+// Three conditions must hold
 // 1. BLOCK_SIZE is a power of 2
 // 2. BLOCK_SIZE <= 1024
 // 3. TILE_SIZE^2 = BLOCK_SIZE
-// 4. BLOCK_SIZE = SCAN_BLOCK_DIM
-#define TILE_SIZE 16
-#define BLOCK_SIZE 256
+#define TILE_SIZE 32
+#define BLOCK_SIZE 1024
 #define SCAN_BLOCK_DIM BLOCK_SIZE
 
 #define DEBUG
@@ -469,20 +468,20 @@ __global__ void kernalRender() {
     const float invWidth = 1.f / imageWidth;
     const float invHeight = 1.f / imageHeight;
 
-    const short px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
-    const short py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
+    uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
+    uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
-    const short bottom = blockIdx.y * TILE_SIZE;
-    const short top = bottom + TILE_SIZE;
-    const short left = blockIdx.x * TILE_SIZE;
-    const short right = left + TILE_SIZE;
+    float bottom = blockIdx.y * TILE_SIZE;
+    float top = bottom + TILE_SIZE;
+    float left = blockIdx.x * TILE_SIZE;
+    float right = left + TILE_SIZE;
 
     // This is what is passed into exclusiveScan and indexes in input/output in the shared memmory
-    const short sharedLinearIndex = threadIdx.x;
+    uint sharedLinearIndex = threadIdx.x;
 
     // For each circle chunk 
     for (int circleStart = 0; circleStart < cuConstRendererParams.numCircles; circleStart += (BLOCK_SIZE - 1)) { 
-        uint circleIndex = circleStart + sharedLinearIndex;
+        int circleIndex = circleStart + sharedLinearIndex;
 
         // Compute one hots
         float3 p = *(float3*)(&cuConstRendererParams.position[circleIndex * 3]);
@@ -506,7 +505,7 @@ __global__ void kernalRender() {
         __syncthreads();
 
         // Update sizes
-        uint possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
+        int possiableCirclesCount = circleOneHot[BLOCK_SIZE - 1] == 0 ? indexes[BLOCK_SIZE - 1] : indexes[BLOCK_SIZE - 1] + 1;
 
         // color tile
         // If there pixel is in bounds color it 
@@ -522,7 +521,7 @@ __global__ void kernalRender() {
 
             // Iterate through possiable circles to color pixel 
             for (int i = 0; i < possiableCirclesCount; i++) {
-                uint possiableCircleIndex = possiableCircles[i];
+                int possiableCircleIndex = possiableCircles[i];
                 float3 cp = *(float3*)(&cuConstRendererParams.position[possiableCircleIndex * 3]);
 
                 // Check if the circle intersect the specific pixel
@@ -756,14 +755,3 @@ CudaRenderer::advanceAnimation() {
     }
     cudaDeviceSynchronize();
 }
-
-// void
-// CudaRenderer::render() {
-
-//     // 256 threads per block is a healthy number
-//     dim3 blockDim(256, 1);
-//     dim3 gridDim((numCircles + blockDim.x - 1) / blockDim.x);
-
-//     kernelRenderCircles<<<gridDim, blockDim>>>();
-//     cudaDeviceSynchronize();
-// }
