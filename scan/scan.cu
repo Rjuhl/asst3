@@ -42,18 +42,18 @@ static inline int nextPow2(int n) {
 // Also, as per the comments in cudaScan(), you can implement an
 // "in-place" scan, since the timing harness makes a copy of input and
 // places it in result
-__global__ void upSweepKernal(int N, int two_d, int* output) {
+__global__ void upSweepKernal(int N, int two_d, int two_d2, int* output) {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id % (2 * two_d) != 0 or id >= N) return;
-    output[id + (2 * two_d) - 1] += output[id + two_d - 1];
+    if (id % (two_d2) != 0 or id >= N) return;
+    output[id + (two_d2) - 1] += output[id + two_d - 1];
 }
 
-__global__ void downSweepKernal(int N, int two_d, int* output) {
+__global__ void downSweepKernal(int N, int two_d, int two_d2, int* output) {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id % (2 * two_d) != 0 or id >= N) return;
+    if (id % (two_d2) != 0 or id >= N) return;
     int t = output[id + two_d - 1];
-    output[id + two_d - 1] = output[id + (2 * two_d) - 1];
-    output[id + (2 * two_d) - 1] += t;
+    output[id + two_d - 1] = output[id + (two_d2) - 1];
+    output[id + (two_d2) - 1] += t;
 }
 
 __global__ void zeroLastValue(int N, int* output) {
@@ -80,14 +80,14 @@ void exclusive_scan(int* input, int N, int* result)
 
     // up sweep phase
     for (int two_d = 1; two_d <= N/2; two_d*=2) {
-        upSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, result);
+        upSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, 2 * two_d, result);
     }
 
     zeroLastValue<<<1, 1>>>(N, result);
 
     // down sweep phase
     for (int two_d = N/2; two_d >= 1; two_d /= 2) {
-        downSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, result);
+        downSweepKernal<<<blocks, threadsPerBlock>>>(N, two_d, 2 * two_d, result);
     }
 
 }
