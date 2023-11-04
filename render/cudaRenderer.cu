@@ -471,8 +471,9 @@ __global__ void kernalRender() {
     uint px = blockIdx.x * TILE_SIZE + (threadIdx.x % TILE_SIZE);
     uint py = blockIdx.y * TILE_SIZE + (threadIdx.x / TILE_SIZE);
 
-    float top = blockIdx.y * TILE_SIZE;
-    float bottom = top - TILE_SIZE;
+    if (blockIdx.y > 3) return; 
+    float bottom = blockIdx.y * TILE_SIZE;
+    float top = bottom + TILE_SIZE;
     float left = blockIdx.x * TILE_SIZE;
     float right = left + TILE_SIZE;
 
