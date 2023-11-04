@@ -14,12 +14,8 @@
 #include "sceneLoader.h"
 #include "util.h"
 
-// Three conditions must hold
-// 1. BLOCK_SIZE is a power of 2
-// 2. BLOCK_SIZE <= 1024
-// 3. TILE_SIZE^2 = BLOCK_SIZE
-#define TILE_SIZE 32
-#define BLOCK_SIZE 1024
+#define TILE_SIZE 16
+#define BLOCK_SIZE 256
 #define SCAN_BLOCK_DIM BLOCK_SIZE
 
 #define DEBUG
@@ -454,7 +450,7 @@ __global__ void kernelRenderCircles() {
     }
 }
 
-// <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), BLOCK_SIZE)>>>
+// <<<(w + tileSize.x - 1 / tileSize.x, h - tileSize.y - 1 / tileSize.y), (TILE_SIZE, TILE_SIZE))>>>
 __global__ void kernalRender() {
     // Init shared arrays (shared arrays are accessible by every thread in a block)
     __shared__ uint possiableCircles[BLOCK_SIZE];
